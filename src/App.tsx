@@ -1,9 +1,51 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import './App.css';
 
 import logoImg from './assets/logo.png';
 
+interface InfoProps{
+  title: string;
+  gasolina: string | number;
+  alcool: string | number;
+}
+
 export default function App() {
+
+  const [gasolinaInput, setGasolinaInput] = useState(1);
+  const [alcoolInput, setAlcoolInput] = useState(1);
+  const [info, setInfo] = useState<InfoProps>()
+
+  function calcular(event: FormEvent) {
+    event.preventDefault();
+
+    let calculo = (alcoolInput / gasolinaInput)
+
+    if (calculo <= 0.7) {
+      setInfo({
+        title: "Compensa usar Álcool",
+        gasolina: formatarMoeda(gasolinaInput),
+        alcool: formatarMoeda(alcoolInput),
+      })
+    } else {
+      setInfo({
+        title: "Compensa usar Gasolina",
+        gasolina: formatarMoeda(gasolinaInput),
+        alcool: formatarMoeda(alcoolInput),
+      })
+    }
+  }
+
+  function formatarMoeda(valor: number) {
+    let valorFormatado = valor.toLocaleString("pt-br",
+      {
+        style: "currency",
+        currency: "BRL"
+      }
+    )
+
+    return valorFormatado;
+  }
+
   return (
     <div>
       <main className="container">
@@ -12,17 +54,27 @@ export default function App() {
 
         <h1 className="title">Qual é a melhor opção?</h1>
         
-        <form className="form">
+        <form className="form" onSubmit={calcular}>
 
           <label htmlFor="precoAlcool">Álcool (preço por litro):</label>
-          <input id="precoAlcool" type="number" className="input" placeholder="4,90" min="0.1" step="0.1" required />
+          <input id="precoAlcool" type="number" className="input" placeholder="4,90" min="0.01" step="0.01" value={alcoolInput} onChange={(e) => setAlcoolInput(Number(e.target.value))} required />
 
           <label htmlFor="precoGasolina">Gasolina (preço por litro):</label>
-          <input id="precoGasolina" type="number" className="input" placeholder="4,90" min="0.1" step="0.1" required />
+          <input id="precoGasolina" type="number" className="input" placeholder="4,90" min="0.01" step="0.01" value={gasolinaInput} onChange={(e) => setGasolinaInput(Number(e.target.value))} required />
 
           <button className="button">Calcular</button>
 
         </form>
+
+        {info && Object.keys(info).length > 0 && (
+          <section className="result">
+            <h2 className="result-title">{info.title}</h2>
+
+            <span>Álcool: {info.alcool}</span>
+            <span>Gasolin: {info.gasolina}</span>
+          </section>
+        )}
+
       </main>
     </div>
   )
